@@ -143,4 +143,14 @@ end
 state = main()
 ```
 
+### Output
+
+```text
+Steps:           100000
+Elapsed time:    0.0101 s
+Acceptance rate: 0.994
+Allocated bytes: 0
+Saved plot: gaussian.png
+```
+
 ![Gaussian sampling result](example/gaussian.png)
