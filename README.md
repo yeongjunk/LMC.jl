@@ -3,11 +3,12 @@ This package is optimized for relatively high-dimensional complex vectors common
 
 The ReplicaExchange.jl package is required. Since neither package is currently registered in the Julia General Registry, install them directly from GitHub using Pkg.develop:
 
+```julia
 using Pkg
 
 Pkg.develop(url="https://github.com/yeongjunk/ReplicaExchange.jl")
 Pkg.develop(url="https://github.com/yeongjunk/LMC.jl")
-
+```
 
 ## Example
 
