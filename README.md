@@ -1,3 +1,6 @@
+## Description
+This package is optimized for relatively high-dimensional complex vectors commonly encountered in physics. Nevertheless, we demonstrate its usage with a single complex variable.
+
 ## Example
 
 ```julia
