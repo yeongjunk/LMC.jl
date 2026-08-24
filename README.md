@@ -1,6 +1,14 @@
 ## Description
 This package is optimized for relatively high-dimensional complex vectors commonly encountered in physics. Nevertheless, we demonstrate its usage with a single complex variable.
 
+The ReplicaExchange.jl package is required. Since neither package is currently registered in the Julia General Registry, install them directly from GitHub using Pkg.develop:
+
+using Pkg
+
+Pkg.develop(url="https://github.com/yeongjunk/ReplicaExchange.jl")
+Pkg.develop(url="https://github.com/yeongjunk/LMC.jl")
+
+
 ## Example
 
 ```julia
