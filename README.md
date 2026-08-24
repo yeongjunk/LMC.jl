@@ -1,6 +1,6 @@
 ## Example
 
-```
+```julia
 using Random
 using LMC
 using Plots
