@@ -132,7 +132,8 @@ function logq_langevin(
         s += abs2(r)
     end
 
-    return -s / (2 * σT^2)
+#    return -s / (2 * σT^2)
+    return -s / σT^2
 end
 
 function lmc_step!(p::LMCParams, state::LMCState{T}; rng=Random.GLOBAL_RNG) where {T <: Real}
