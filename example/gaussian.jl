@@ -73,7 +73,7 @@ function main()
     )
 
     beta = 1.0
-    epsilon = 0.05
+    epsilon = 0.8
     sigma = sqrt(2epsilon)
 
     params = LMCParams(problem, beta, epsilon, sigma)
