@@ -3,8 +3,8 @@ module LMCPT
 using Random
 using Polyester
 
-import ReplicaExchange
-import ReplicaExchange:
+import ParallelTemperingMonteCarlo
+import ParallelTemperingMonteCarlo:
     AbstractReplicas,
     step!,
     step_slot!,
@@ -116,7 +116,7 @@ function adapt_replicas!(reps::LMCReplicas, adaptparams::LMCAdaptParams; rngs=[X
 end
 
 
-function ReplicaExchange.step_slot!(reps::LMCReplicas, slot::Int)
+function ParallelTemperingMonteCarlo.step_slot!(reps::LMCReplicas, slot::Int)
     @inbounds begin
         walker = reps.walkerids[slot]
 
@@ -132,7 +132,7 @@ function ReplicaExchange.step_slot!(reps::LMCReplicas, slot::Int)
     end
 end
 
-function ReplicaExchange.steps!(reps::LMCReplicas, n_steps::Int)
+function ParallelTemperingMonteCarlo.steps!(reps::LMCReplicas, n_steps::Int)
     n_steps > 0 || error("n_steps must be positive.")
 
     n_accepts = zeros(Int, length(reps.betas))
@@ -162,7 +162,7 @@ function ReplicaExchange.steps!(reps::LMCReplicas, n_steps::Int)
     return n_accepts
 end
 
-@inline function ReplicaExchange.step!(reps::LMCReplicas)
+@inline function ParallelTemperingMonteCarlo.step!(reps::LMCReplicas)
     Polyester.@batch per=thread for slot in eachindex(reps.betas)
         step_slot!(reps, slot)
     end
@@ -173,21 +173,21 @@ end
 
 Base.length(reps::LMCReplicas) = length(reps.betas)
 
-ReplicaExchange.getwalkerid(reps::LMCReplicas, slot::Int) = reps.walkerids[slot]
-ReplicaExchange.getwalkerids(reps::LMCReplicas) = reps.walkerids
-ReplicaExchange.getbeta(reps::LMCReplicas, slot::Int) = reps.betas[slot]
+ParallelTemperingMonteCarlo.getwalkerid(reps::LMCReplicas, slot::Int) = reps.walkerids[slot]
+ParallelTemperingMonteCarlo.getwalkerids(reps::LMCReplicas) = reps.walkerids
+ParallelTemperingMonteCarlo.getbeta(reps::LMCReplicas, slot::Int) = reps.betas[slot]
 
-function ReplicaExchange.getenergy(reps::LMCReplicas, slot::Int)
+function ParallelTemperingMonteCarlo.getenergy(reps::LMCReplicas, slot::Int)
     walker = reps.walkerids[slot]
     return reps.energies[walker]
 end
 
-function ReplicaExchange.getstate(reps::LMCReplicas, slot::Int)
+function ParallelTemperingMonteCarlo.getstate(reps::LMCReplicas, slot::Int)
     walker = reps.walkerids[slot]
     return reps.states[walker].ψ
 end
 
-function ReplicaExchange.swapwalkers!(reps::LMCReplicas, slot_i::Int, slot_j::Int)
+function ParallelTemperingMonteCarlo.swapwalkers!(reps::LMCReplicas, slot_i::Int, slot_j::Int)
     reps.walkerids[slot_i], reps.walkerids[slot_j] = reps.walkerids[slot_j], reps.walkerids[slot_i]
 
     return nothing
