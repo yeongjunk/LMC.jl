@@ -143,3 +143,4 @@ end
 state = main()
 ```
 
+![Gaussian sampling result](example/gaussian.png)
