@@ -159,8 +159,8 @@ state = main()
 
 ```text
 Steps:           100000
-Elapsed time:    0.0101 s
-Acceptance rate: 0.994
+Elapsed time:    0.0104 s
+Acceptance rate: 0.6175
 Allocated bytes: 0
 Saved plot: gaussian.png
 ```
