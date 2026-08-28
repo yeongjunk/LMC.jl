@@ -422,7 +422,7 @@ uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
 version = "22.1.7+0"
 
 [[deps.LMC]]
-deps = ["LinearAlgebra", "Parameters", "Polyester", "Random", "ReplicaExchange", "Statistics"]
+deps = ["LinearAlgebra", "ParallelTemperingSamplers", "Parameters", "Polyester", "Random", "Statistics"]
 path = ".."
 uuid = "53dc4934-8467-4f08-85b9-d3b192d77677"
 version = "0.1.0"
@@ -657,11 +657,17 @@ git-tree-sha1 = "7126b66b721a605a2fec966a2874c5ed53258eb3"
 uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.58.0+0"
 
+[[deps.ParallelTemperingSamplers]]
+deps = ["LinearAlgebra", "Random"]
+git-tree-sha1 = "2bfe527fe2768737dcb2895f2b23a5b21c4ba867"
+uuid = "52bd480a-a86d-4047-9660-0fcaefa78374"
+version = "0.1.0"
+
 [[deps.Parameters]]
 deps = ["OrderedCollections", "UnPack"]
-git-tree-sha1 = "34c0e9ad262e5f7fc75b10a9952ca7692cfc5fbe"
+git-tree-sha1 = "0ed04c372da78ff5b98e35e3bd4f4ca9931299cc"
 uuid = "d96e819e-fc66-5662-9728-84c9c7592b0a"
-version = "0.12.3"
+version = "0.13.1"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
@@ -812,12 +818,6 @@ deps = ["SHA", "Scratch"]
 git-tree-sha1 = "ffdaf70d81cf6ff22c2b6e733c900c3321cab864"
 uuid = "05181044-ff0b-4ac5-8273-598c1e38db00"
 version = "1.0.1"
-
-[[deps.ReplicaExchange]]
-deps = ["LinearAlgebra", "Random"]
-path = "../../ReplicaExchange"
-uuid = "52bd480a-a86d-4047-9660-0fcaefa78374"
-version = "0.1.0"
 
 [[deps.Requires]]
 deps = ["UUIDs"]

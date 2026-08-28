@@ -3,8 +3,8 @@ module LMCPT
 using Random
 using Polyester
 
-import ParallelTemperingMonteCarlo
-import ParallelTemperingMonteCarlo:
+import ParallelTemperingSamplers
+import ParallelTemperingSamplers:
     AbstractReplicas,
     step!,
     step_slot!,
@@ -116,7 +116,7 @@ function adapt_replicas!(reps::LMCReplicas, adaptparams::LMCAdaptParams; rngs=[X
 end
 
 
-function ParallelTemperingMonteCarlo.step_slot!(reps::LMCReplicas, slot::Int)
+function ParallelTemperingSamplers.step_slot!(reps::LMCReplicas, slot::Int)
     @inbounds begin
         walker = reps.walkerids[slot]
 
@@ -132,7 +132,7 @@ function ParallelTemperingMonteCarlo.step_slot!(reps::LMCReplicas, slot::Int)
     end
 end
 
-function ParallelTemperingMonteCarlo.steps!(reps::LMCReplicas, n_steps::Int)
+function ParallelTemperingSamplers.steps!(reps::LMCReplicas, n_steps::Int)
     n_steps > 0 || error("n_steps must be positive.")
 
     n_accepts = zeros(Int, length(reps.betas))
@@ -162,7 +162,7 @@ function ParallelTemperingMonteCarlo.steps!(reps::LMCReplicas, n_steps::Int)
     return n_accepts
 end
 
-@inline function ParallelTemperingMonteCarlo.step!(reps::LMCReplicas)
+@inline function ParallelTemperingSamplers.step!(reps::LMCReplicas)
     Polyester.@batch per=thread for slot in eachindex(reps.betas)
         step_slot!(reps, slot)
     end
@@ -173,21 +173,21 @@ end
 
 Base.length(reps::LMCReplicas) = length(reps.betas)
 
-ParallelTemperingMonteCarlo.getwalkerid(reps::LMCReplicas, slot::Int) = reps.walkerids[slot]
-ParallelTemperingMonteCarlo.getwalkerids(reps::LMCReplicas) = reps.walkerids
-ParallelTemperingMonteCarlo.getbeta(reps::LMCReplicas, slot::Int) = reps.betas[slot]
+ParallelTemperingSamplers.getwalkerid(reps::LMCReplicas, slot::Int) = reps.walkerids[slot]
+ParallelTemperingSamplers.getwalkerids(reps::LMCReplicas) = reps.walkerids
+ParallelTemperingSamplers.getbeta(reps::LMCReplicas, slot::Int) = reps.betas[slot]
 
-function ParallelTemperingMonteCarlo.getenergy(reps::LMCReplicas, slot::Int)
+function ParallelTemperingSamplers.getenergy(reps::LMCReplicas, slot::Int)
     walker = reps.walkerids[slot]
     return reps.energies[walker]
 end
 
-function ParallelTemperingMonteCarlo.getstate(reps::LMCReplicas, slot::Int)
+function ParallelTemperingSamplers.getstate(reps::LMCReplicas, slot::Int)
     walker = reps.walkerids[slot]
     return reps.states[walker].ψ
 end
 
-function ParallelTemperingMonteCarlo.swapwalkers!(reps::LMCReplicas, slot_i::Int, slot_j::Int)
+function ParallelTemperingSamplers.swapwalkers!(reps::LMCReplicas, slot_i::Int, slot_j::Int)
     reps.walkerids[slot_i], reps.walkerids[slot_j] = reps.walkerids[slot_j], reps.walkerids[slot_i]
 
     return nothing
