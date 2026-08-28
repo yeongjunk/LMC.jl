@@ -1,12 +1,23 @@
+[![CI](https://github.com/yeongjunk/LMC.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/yeongjunk/LMC.jl/actions/workflows/CI.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Description
 This package is optimized for relatively high-dimensional complex vectors commonly encountered in physics. Nevertheless, we demonstrate its usage with a single complex variable.
 
-The ParallelTemperingMonteCarlo.jl package is required. Since neither package is currently registered in the Julia General Registry, install them directly from GitHub using Pkg.develop:
+LMC.jl can be used as a standalone Monte Carlo sampler. It also provides a parallel-tempering implementation through `LMC.LMCPT`, built on the interface provided by [ParallelTemperingSamplers.jl](https://github.com/yeongjunk/ParallelTemperingSamplers.jl). For detailed usage of `LMC.LMCPT`, see the [ParallelTemperingSamplers.jl documentation](https://github.com/yeongjunk/ParallelTemperingSamplers.jl).
+
+
+## Installation
+
+```julia
+using Pkg
+Pkg.develop(url="https://github.com/yeongjunk/LMC.jl")
+```
+
 
 ```julia
 using Pkg
 
-Pkg.develop(url="https://github.com/yeongjunk/ParallelTemperingMonteCarlo.jl")
 Pkg.develop(url="https://github.com/yeongjunk/LMC.jl")
 ```
 
