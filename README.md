@@ -11,12 +11,6 @@ LMC.jl can be used as a standalone Monte Carlo sampler. It also provides a paral
 
 ```julia
 using Pkg
-Pkg.develop(url="https://github.com/yeongjunk/LMC.jl")
-```
-
-
-```julia
-using Pkg
 
 Pkg.develop(url="https://github.com/yeongjunk/LMC.jl")
 ```
