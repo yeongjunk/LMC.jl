@@ -11,7 +11,7 @@ function sample!(p::LMCParams, state::LMCState,n_steps::Int; rng = Random.GLOBAL
     save_idx = 0 
 
     for i in 1:n_steps
-        accept += step!(p, state; rng=rng)
+        accept += lmc_step!(p, state; rng=rng)
 
         if i % save_every == 0
             save_idx += 1
