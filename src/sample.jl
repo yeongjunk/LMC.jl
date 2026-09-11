@@ -16,7 +16,7 @@ function sample!(p::LMCParams, state::LMCState,n_steps::Int; rng = Random.GLOBAL
         if i % save_every == 0
             save_idx += 1
             copyto!(view(samples, :, save_idx), state.ψ)
-            energies[save_idx] = state.H
+            energies[save_idx] = state.E
         end 
     end 
 

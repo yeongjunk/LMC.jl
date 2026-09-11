@@ -132,7 +132,6 @@ function logq_langevin(
         s += abs2(r)
     end
 
-#    return -s / (2 * σT^2)
     return -s / σT^2
 end
 
@@ -159,13 +158,10 @@ function lmc_step!(p::LMCParams, state::LMCState{T}; rng=Random.GLOBAL_RNG) wher
     # compute proposal energy and gradient together if available
     Etmp = energy_and_grad!(problem, ψtmp, Gtmp)
 
-
-
     logq_forward  = logq_langevin(ψtmp, ψ, G, ϵ, σ)
     logq_backward = logq_langevin(ψ, ψtmp, Gtmp, ϵ, σ)
 
     logα = β * (Eψ - Etmp) + logq_backward - logq_forward
-#    if isfinite(logα) && log(rand(rng)) < min(0.0, logα)
     if logα >= 0 || (isfinite(logα) && log(rand(rng)) < logα)
         # proposal becomes current state
         state.ψ, state.ψtmp = state.ψtmp, state.ψ
