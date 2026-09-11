@@ -6,6 +6,14 @@ This package is optimized for relatively high-dimensional complex vectors common
 
 LMC.jl can be used as a standalone Monte Carlo sampler. It also provides a parallel-tempering implementation through `LMC.LMCPT`, built on the interface provided by [ParallelTemperingSamplers.jl](https://github.com/yeongjunk/ParallelTemperingSamplers.jl). For detailed usage of `LMC.LMCPT`, see the [ParallelTemperingSamplers.jl documentation](https://github.com/yeongjunk/ParallelTemperingSamplers.jl).
 
+## Roadmap
+
+- [ ] Test the package-level `sample!` implementation directly, replacing the sampling loop currently implemented in the test suite, and verify the recent bug fix.
+- [ ] Support both real and complex state vectors with the simplest reusable implementation. Introduce an abstract state hierarchy only if it results in a cleaner shared sampling kernel.
+- [ ] Add compatibility with the `LogDensityProblems.jl` interface. This is planned as a later project.
+- [ ] Rename the package to a descriptive name longer than three characters, as required for registration in the Julia General registry.
+- [ ] Register the completed package in the Julia General registry.
+
 
 ## Installation
 
