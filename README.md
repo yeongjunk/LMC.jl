@@ -8,8 +8,8 @@ LMC.jl can be used as a standalone Monte Carlo sampler. It also provides a paral
 
 ## Roadmap
 
-- [ ] Test the package-level `sample!` implementation directly, replacing the sampling loop currently implemented in the test suite, and verify the recent bug fix.
-- [ ] Support both real and complex state vectors with the simplest reusable implementation. Introduce an abstract state hierarchy only if it results in a cleaner shared sampling kernel.
+- [x] Test the package-level `sample!` implementation directly, replacing the sampling loop currently implemented in the test suite, and verify the recent bug fix.
+- [x] Support both real and complex state vectors with the simplest reusable implementation.
 - [ ] Add compatibility with the `LogDensityProblems.jl` interface. This is planned as a later project.
 - [ ] Rename the package to a descriptive name longer than three characters, as required for registration in the Julia General registry.
 - [ ] Register the completed package in the Julia General registry.
