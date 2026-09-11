@@ -1,9 +1,10 @@
-using Random
-using LMC
-using Plots
+using Test
+import Random: Xoshiro
+import Statistics: mean, var
+import LMC: ComplexLMCState, LMCParams, LMCState, ProblemWithEG, RealLMCState, sample!
 
 # H(ψ) = 1/2 ∑ᵢ |ψᵢ|²
-function energy(ψ)
+function gaussian_energy(ψ)
     E = 0.0
 
     @inbounds @simd for i in eachindex(ψ)
@@ -13,7 +14,15 @@ function energy(ψ)
     return E / 2
 end
 
-function gradient!(ψ, grad)
+function gaussian_gradient!(ψ::Vector{T}, grad) where {T<:Real}
+    @inbounds @simd for i in eachindex(ψ, grad)
+        grad[i] = ψ[i]
+    end
+
+    return nothing
+end
+
+function gaussian_gradient!(ψ::Vector{Complex{T}}, grad) where {T<:Real}
     @inbounds @simd for i in eachindex(ψ, grad)
         grad[i] = ψ[i] / 2
     end
@@ -21,121 +30,59 @@ function gradient!(ψ, grad)
     return nothing
 end
 
-function energy_and_gradient!(ψ, grad)
+function gaussian_energy_and_gradient!(ψ, grad)
     E = 0.0
 
+    gaussian_gradient!(ψ, grad)
+
     @inbounds @simd for i in eachindex(ψ, grad)
-        grad[i] = ψ[i] / 2
         E += abs2(ψ[i])
     end
 
     return E / 2
 end
 
-function run_steps!(params, state, rng, n_steps)
-    n_accepts = 0
-
-    for _ in 1:n_steps
-        n_accepts += LMC.lmc_step!(params, state; rng)
-    end
-
-    return n_accepts
-end
-
-function collect_samples!(
-    samples,
-    params,
-    state,
-    rng,
-    sample_every,
-)
-    n_accepts = 0
-
-    for i in eachindex(samples)
-        for _ in 1:sample_every
-            n_accepts += LMC.lmc_step!(params, state; rng)
-        end
-
-        samples[i] = real(state.ψ[1])
-    end
-
-    return n_accepts
-end
-
-function main()
-    rng = Xoshiro(1234)
-    n_variables = 16
-
-    problem = ProblemWithEG(
-        gradient!,
-        energy,
-        energy_and_gradient!,
-    )
+function sample_gaussian(ψ; seed)
+    problem = ProblemWithEG(gaussian_gradient!, gaussian_energy, gaussian_energy_and_gradient!)
 
     beta = 1.0
     epsilon = 0.8
     sigma = sqrt(2epsilon)
 
     params = LMCParams(problem, beta, epsilon, sigma)
-    state = LMCState(zeros(ComplexF64, n_variables))
+    state = LMCState(ψ)
+    samples, energies, stats = sample!(params, state, 200_000; rng=Xoshiro(seed), save_every=10)
 
-    # Compilation and initialization
-    run_steps!(params, state, rng, 10)
-
-    # Performance measurement
-    n_steps = 100_000
-
-    stats = @timed run_steps!(
-        params,
-        state,
-        rng,
-        n_steps,
-    )
-
-    println("Steps:           ", n_steps)
-    println("Elapsed time:    ", round(stats.time; digits=4), " s")
-    println("Acceptance rate: ", round(stats.value / n_steps; digits=4))
-    println("Allocated bytes: ", stats.bytes)
-
-    # Sampling for visualization
-    n_samples = 20_000
-    sample_every = 10
-    samples = Vector{Float64}(undef, n_samples)
-
-    collect_samples!(
-        samples,
-        params,
-        state,
-        rng,
-        sample_every,
-    )
-
-    gaussian(x) = sqrt(beta / (2π)) * exp(-beta * x^2 / 2)
-
-    p = histogram(
-        samples;
-        bins=80,
-        normalize=:pdf,
-        alpha=0.5,
-        label="LMC samples",
-        xlabel="Re(ψ₁)",
-        ylabel="Probability density",
-        title="Complex Gaussian sampling",
-    )
-
-    plot!(
-        p,
-        gaussian,
-        -4,
-        4;
-        linewidth=2,
-        label="Exact Gaussian",
-    )
-
-    savefig(p, "gaussian.png")
-    println("Saved plot: gaussian.png")
-
-    return state
+    return state, samples, energies, stats
 end
 
-state = main()
+@testset "Gaussian sampling" begin
+    @testset "real state" begin
+        state, samples, energies, stats = sample_gaussian(zeros(Float64, 4); seed=1234)
+        x = vec(samples[1, :])
+
+        @test state isa RealLMCState{Float64}
+        @test length(state.noise) == length(state.ψ)
+        @test eltype(samples) == Float64
+        @test 0.5 < stats.accept_rate < 0.9
+        @test abs(mean(x)) < 0.05
+        @test abs(var(x) - 1.0) < 0.08
+        @test all(isfinite, energies)
+    end
+
+    @testset "complex state" begin
+        state, samples, energies, stats = sample_gaussian(zeros(ComplexF64, 4); seed=5678)
+        x = vec(real.(samples[1, :]))
+        y = vec(imag.(samples[1, :]))
+
+        @test state isa ComplexLMCState{Float64}
+        @test length(state.noise) == 2length(state.ψ)
+        @test eltype(samples) == ComplexF64
+        @test 0.5 < stats.accept_rate < 0.9
+        @test abs(mean(x)) < 0.05
+        @test abs(mean(y)) < 0.05
+        @test abs(var(x) - 1.0) < 0.08
+        @test abs(var(y) - 1.0) < 0.08
+        @test all(isfinite, energies)
+    end
+end

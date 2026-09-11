@@ -1,7 +1,7 @@
 
 using LinearAlgebra, Random
 
-export Problem, LMCParams, LMCState, step!, ProblemWithEG
+export Problem, LMCParams, LMCState, RealLMCState, ComplexLMCState, step!, ProblemWithEG
 
 # ----------------------------
 # Problem / Params / State
@@ -35,12 +35,12 @@ mutable struct LMCParams{TP <:AbstractProblem}
     σ::Float64
 end
 
-mutable struct LMCState{T <: Real}
-    ψ::Vector{Complex{T}}       # current accepted state
-    ψtmp::Vector{Complex{T}}    # proposal buffer
+mutable struct LMCState{T<:Real,S<:Union{T,Complex{T}}}
+    ψ::Vector{S}       # current accepted state
+    ψtmp::Vector{S}    # proposal buffer
 
-    G::Vector{Complex{T}}       # grad at current ψ
-    Gtmp::Vector{Complex{T}}    # grad at proposal ψtmp
+    G::Vector{S}       # grad at current ψ
+    Gtmp::Vector{S}    # grad at proposal ψtmp
 
 
     E::T                        # H(current ψ)
@@ -50,43 +50,58 @@ mutable struct LMCState{T <: Real}
     initialized::Bool
 end
 
-function LMCState(ψ::Vector{Complex{T}}) where {T <: Real}
-    ψ=copy(ψ)
+const RealLMCState{T} = LMCState{T, T}
+const ComplexLMCState{T} = LMCState{T, Complex{T}}
+
+function LMCState(ψ::Vector{T}) where {T<:Real}
+    ψ = copy(ψ)
     ψtmp = similar(ψ)
     G = similar(ψ)
     Gtmp = similar(ψ)
-    r = similar(ψ)
-    H = zero(T) 
-    Htmp = zero(T) 
+    H = zero(T)
+    Htmp = zero(T)
+    noise = Array{T}(undef, length(ψ))
+    initialized = false
+    return RealLMCState{T}(ψ, ψtmp, G, Gtmp, H, Htmp, noise, initialized)
+end
+
+function LMCState(ψ::Vector{Complex{T}}) where {T<:Real}
+    ψ = copy(ψ)
+    ψtmp = similar(ψ)
+    G = similar(ψ)
+    Gtmp = similar(ψ)
+    H = zero(T)
+    Htmp = zero(T)
     noise = Array{T}(undef, 2*length(ψ))
     initialized = false
-    return LMCState{T}(ψ, ψtmp, G, Gtmp, H, Htmp, noise, initialized)
+    return ComplexLMCState{T}(ψ, ψtmp, G, Gtmp, H, Htmp, noise, initialized)
 end
 
 
 # ----------------------------
 # Internal kernels
 # ----------------------------
-# function propose_from_grad!(
-#     ψ::Vector{Complex{T}},
-#     ψ0::Vector{Complex{T}},
-#     G0::Vector{Complex{T}},
-#     ϵ::Real,
-#     σ::Real;
-#     rng=Random.GLOBAL_RNG,
-# ) where {T <: Real}
-# 
-#     ϵT = T(ϵ)
-#     σT = T(σ)
-#     
-#     F = eltype(ψ)
-#     randn!(rng, ψ)
-#     @inbounds @simd for i in eachindex(ψ, ψ0, G0)
-#         ψ[i] = ψ0[i] - ϵT * G0[i] + σT*ψ[i]
-#     end
-# 
-#     return nothing
-# end
+function propose_from_grad!(
+    ψ::Vector{T},
+    ψ0::Vector{T},
+    G0::Vector{T},
+    noise::Vector{T},
+    ϵ::Real,
+    σ::Real;
+    rng=Random.GLOBAL_RNG,
+) where {T<:Real}
+
+    ϵT = T(ϵ) / T(2)
+    σT = T(σ) / sqrt(T(2))
+
+    randn!(rng, noise)
+
+    @inbounds @simd for i in eachindex(ψ, ψ0, G0, noise)
+        ψ[i] = ψ0[i] - ϵT * G0[i] + σT * noise[i]
+    end
+
+    return nothing
+end
 
 function propose_from_grad!(
     ψ::Vector{Complex{T}},
@@ -114,15 +129,19 @@ end
 
 
 
+gradient_scale(::Type{T}) where {T<:Real} = T(1) / T(2)
+gradient_scale(::Type{Complex{T}}) where {T<:Real} = one(T)
+
 function logq_langevin(
-    ψ_to::Vector{Complex{T}},
-    ψ_from::Vector{Complex{T}},
-    G_from::Vector{Complex{T}},
+    ψ_to::Vector{S},
+    ψ_from::Vector{S},
+    G_from::Vector{S},
     ϵ::Real,
     σ::Real,
-) where {T<:Real}
+) where {S<:Number}
 
-    ϵT = T(ϵ)
+    T = typeof(real(zero(S)))
+    ϵT = T(ϵ) * gradient_scale(S)
     σT = T(σ)
 
     s = zero(T)
@@ -135,7 +154,7 @@ function logq_langevin(
     return -s / σT^2
 end
 
-function lmc_step!(p::LMCParams, state::LMCState{T}; rng=Random.GLOBAL_RNG) where {T <: Real}
+function lmc_step!(p::LMCParams, state::LMCState{T,S}; rng=Random.GLOBAL_RNG) where {T<:Real,S<:Number}
     problem = p.problem
     β, ϵ, σ = p.β, p.ϵ, p.σ
 
@@ -177,5 +196,3 @@ function lmc_step!(p::LMCParams, state::LMCState{T}; rng=Random.GLOBAL_RNG) wher
         return false
     end
 end
-
-
