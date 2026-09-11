@@ -1,6 +1,6 @@
 name = "LMC"
 uuid = "53dc4934-8467-4f08-85b9-d3b192d77677"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["yjkim <yeongjun.kim.04@gmail.com>"]
 
 [deps]
